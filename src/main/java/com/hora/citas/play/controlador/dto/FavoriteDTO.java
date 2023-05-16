@@ -23,6 +23,8 @@ public class FavoriteDTO {
     private String songId;
 
 
-    private String songName;
-
+    public FavoriteDTO(User user, String songId) {
+        this.user = user;
+        this.songId = songId;
+    }
 }

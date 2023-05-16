@@ -25,7 +25,9 @@ public class Favorite {
     @Column(nullable = false)
     private String songId;
 
-    @Column(nullable = false)
-    private String songName;
 
+    public Favorite(User user, String songId) {
+        this.user = user;
+        this.songId = songId;
+    }
 }

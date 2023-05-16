@@ -1,6 +1,10 @@
 package com.hora.citas.play.controlador;
 
+import com.hora.citas.play.service.usecases.GetUserByNameUSeCase;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.hora.citas.play.controlador.dto.UserDTO;
 import com.hora.citas.play.entity.User;
@@ -18,10 +22,15 @@ import javax.crypto.SecretKey;
 import java.net.URI;
 import java.security.SecureRandom;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user")
+@CrossOrigin("*")
 public class UserController {
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
 
 
     @Autowired
@@ -29,24 +38,12 @@ public class UserController {
 
     @Autowired
     private LoginUseCase loginUseCase;
+    @Autowired
+    private GetUserByNameUSeCase getUserByNameUSeCase;
 
-//    @GetMapping("/{id}")
-//    public ResponseEntity<?> getPacienteById(@PathVariable Long id) {
-//        try {
-//            Paciente paciente = pacienteService.getPacienteById(id);
-//            if (paciente == null) {
-//                return ResponseEntity.notFound().build();
-//            }
-//            return ResponseEntity.ok(paciente);
-//        } catch (DataAccessException e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error de acceso a datos");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error desconocido");
-//        }
-//    }
+    private static final String SECRET_KEY = "montoya_clave_secreta343434343434343434#";
 
 
-// ...
 
     @PostMapping("/register")
     public ResponseEntity<Object> createUser(@RequestBody UserDTO userDTO) {
@@ -64,10 +61,14 @@ public class UserController {
                     saveUser.getUsername(),
                     saveUser.getPassword());
 
+            logger.info("User created successfully: {}", responseDTO.getId());
+
             return ResponseEntity.created(URI.create("/api/user/" + responseDTO.getId())).body(responseDTO);
         } catch (DataAccessException e) {
+            logger.error("DataAccessException occurred: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error de acceso a datos");
         } catch (Exception e) {
+            logger.error("Exception occurred: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -75,24 +76,52 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody UserDTO userDTO) {
         try {
-
-            User user = loginUseCase.findByUsername(userDTO.getUsername());
+            User user = loginUseCase
+                    .findByUsername(userDTO.getUsername());
 
             if (user != null && new BCryptPasswordEncoder().matches(userDTO.getPassword(), user.getPassword())) {
-                byte[] keyBytes = new byte[256 / 8];
-                SecureRandom secureRandom = new SecureRandom();
-                secureRandom.nextBytes(keyBytes);
-                SecretKey key = Keys.hmacShaKeyFor(keyBytes);
+
                 String token = Jwts.builder()
                         .setSubject(user.getUsername())
                         .setExpiration(new Date(System.currentTimeMillis() + 86400000L))
-                        .signWith(key, SignatureAlgorithm.HS256)
+                        .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()), SignatureAlgorithm.HS256)
                         .compact();
 
-                return ResponseEntity.ok().header("Authorization", "Bearer " + token).body("Login exitoso");
+                Map<String, String> responseBody = new HashMap<>();
+                responseBody.put("token", "Bearer " + token);
+
+
+                logger.info("User logged in successfully: {}", user.getUsername());
+
+                return ResponseEntity.ok().header("Authorization", "Bearer " + token).body(responseBody);
             } else {
+                logger.info("Invalid credentials for user: {}", userDTO.getUsername());
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
             }
+        } catch (DataAccessException e) {
+            logger.error("DataAccessException occurred: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error de acceso a datos");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+
+    @GetMapping("/get/{username}")
+    public ResponseEntity<Object> getUser(@PathVariable String username) {
+        try {
+
+            User user = getUserByNameUSeCase.findByUsername(username);
+
+            UserDTO userDTOResponse = new UserDTO(user.getId(),
+                    user.getUsername(),
+                    user.getPassword());
+
+
+
+            logger.info("User retrieved successfully: {}", username);
+            return ResponseEntity.ok().body(userDTOResponse);
+
         } catch (DataAccessException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error de acceso a datos");
         } catch (Exception e) {

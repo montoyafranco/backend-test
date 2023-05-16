@@ -3,14 +3,13 @@ package com.hora.citas.play.service.usecases;
 import com.hora.citas.play.entity.User;
 import com.hora.citas.play.repository.UserRepository;
 import org.springframework.stereotype.Service;
-import io.jsonwebtoken.*;
 
 @Service
-public class LoginUseCase {
+public class GetUserByNameUSeCase {
 
     private UserRepository userRepository;
 
-    public LoginUseCase(UserRepository userRepository) {
+    public GetUserByNameUSeCase(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
