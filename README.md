@@ -8,13 +8,15 @@ sesión y guardar canciones en una lista de favoritos. Los usuarios autenticados
 acceder a su lista de favoritos en cualquier momento.
 
 ## Appendix
+Si utilizaraas el frontend siguiente debes usar el puerto 8080
 
 El frontend que pegara a este backend esta construido con angular en esta direccion : https://github.com/montoyafranco/spotify-api-v2
 
 
 ## Installation
 
-Para correr esta app necesitas agregar las credenciales de adminstrador para tu base de datos de MySQL ,ejemplo
+Para correr esta app necesitas agregar las credenciales de adminstrador para tu base de datos de MySQL y se autogenera la DB bajo el nombre backend2 ,ejemplo
+spring.datasource.url=jdbc:mysql://localhost:3306/backend2?createDatabaseIfNotExist=true cambiando luego de localhost:3306/backend2 por otro nombre es la base de datos que se creara
 
 
 
