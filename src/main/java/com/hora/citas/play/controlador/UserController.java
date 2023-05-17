@@ -2,6 +2,9 @@ package com.hora.citas.play.controlador;
 
 import com.hora.citas.play.service.usecases.GetUserByNameUSeCase;
 import io.jsonwebtoken.security.Keys;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +49,11 @@ public class UserController {
 
 
     @PostMapping("/register")
+    @Operation(summary = "Create a new user", description = "Endpoint to register a new user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User created successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<Object> createUser(@RequestBody UserDTO userDTO) {
         try {
             String encodedPassword = new BCryptPasswordEncoder().encode(userDTO.getPassword());
@@ -74,6 +82,12 @@ public class UserController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "User login", description = "Endpoint for user login")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User logged in successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<Object> login(@RequestBody UserDTO userDTO) {
         try {
             User user = loginUseCase
@@ -108,6 +122,11 @@ public class UserController {
 
 
     @GetMapping("/get/{username}")
+    @Operation(summary = "Get user by username", description = "Endpoint to retrieve a user by username")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User retrieved successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<Object> getUser(@PathVariable String username) {
         try {
 

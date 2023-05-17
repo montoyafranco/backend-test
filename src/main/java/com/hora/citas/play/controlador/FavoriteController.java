@@ -12,6 +12,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +55,14 @@ public class FavoriteController {
 
 
     @PostMapping("/guardar")
+    @Operation(summary = "Add favorite song", description = "Endpoint to add a favorite song")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Favorite song added successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+
     public ResponseEntity<Object> addFavorite(@RequestBody FavoriteDTO favoriteDTO, @RequestHeader("Authorization") String token) {
         try {
 
@@ -86,6 +97,12 @@ public class FavoriteController {
 
 
     @GetMapping("/canciones/{userId}")
+    @Operation(summary = "Get favorite songs by user ID", description = "Endpoint to retrieve favorite songs by user ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Favorite songs retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<Object> getCancionesFavoritas(@PathVariable Long userId, @RequestHeader("Authorization") String token) {
         try {
             if (!TokenUtil.validateToken(token)) {
